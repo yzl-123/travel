@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>黑马旅游-搜索</title>
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" href="css/search.css">
+    <script src="js/jquery-3.3.1.js"></script>
+    <script src="js/getParameter.js"></script>
+
+    <!--分页插件-->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/jqPaginator.css">
+
+    <script src="js/jqPaginator.js"></script>
+</head>
+<body>
+<!--引入头部-->
+<div id="header"></div>
+<div class="page_one">
+    <div class="contant">
+        <div class="crumbs">
+            <img src="images/search.png" alt="">
+            <p>黑马旅行><span>搜索结果</span></p>
+        </div>
+        <div class="xinxi clearfix">
+            <div class="left">
+                <div class="header">
+                    <span>商品信息</span>
+                    <span class="jg">价格</span>
+                </div>
+                <ul id="routePage">
+
+                </ul>
+                <div class="page_num_inf">
+
+                </div>
+                <div class="pageNum">
+                    <ul class="pagination">
+
+                    </ul>
+                </div>
+            </div>
+            <div class="right">
+                <div class="top">
+                    <div class="hot">HOT</div>
+                    <span>热门推荐</span>
+                </div>
+                <ul>
+                    <li>
+                        <div class="left"><img src="images/04-search_09.jpg" alt=""></div>
+                        <div class="right">
+                            <p>清远新银盏温泉度假村酒店/自由行套...</p>
+                            <p>网付价<span>&yen;<span>899</span>起</span>
+                            </p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--引入头部-->
+<div id="footer"></div>
+<!--导入布局js，共享header和footer-->
+<script type="text/javascript" src="js/include.js"></script>
+</body>
+<script type="text/javascript">
+    $(function () {
+        var cid = getParameter("cid");
+        changePage(cid, 1, "");  //第1次访问，显示第1页。第1次没有要查询的名字
+    });
+
+    /*
+    加载第1页的数据
+    cid: 分类cid
+    current: 当前是第几页
+    rname: 线路名
+     */
+    function changePage(cid, current,rname) {
+        $.get({
+            url: "route",
+            data: {
+                action: "findRouteListByCid",
+                cid: cid,
+                current: current,
+                rname: rname
+            },
+            success: function (pageBean) {  //封装好的PageBean
+                //取出每条线路
+                var html = "";
+                for (var route of pageBean.data) {
+                    html += "<li>" +
+                        "<div class=\"img\"><img src=\"" + route.rimage + "\" alt=\"\"></div>" +
+                        "<div class=\"text1\">" +
+                        "<p>" + route.rname + "</p>" +
+                        "<br/>" +
+                        "<p>" + route.routeIntroduce + "</p>" +
+                        "</div>" +
+                        "<div class=\"price\">" +
+                        "<p class=\"price_num\">" +
+                        "<span>&yen;</span>" +
+                        "<span>" + route.price + "</span>" +
+                        "<span>起</span>" +
+                        "</p>" +
+                        "<p><a href=\"route_detail.html?rid=" + route.rid + "\">查看详情</a></p>" +
+                        "</div>" +
+                        "</li>";
+                }
+                //放在Div
+                $("#routePage").html(html);
+                //更新分页信息
+                $(".page_num_inf").html("<i></i> 共 <span>" + pageBean.total + "</span>页<span>"
+                    + pageBean.count + "</span>条");
+
+                if (pageBean.count > 0) {
+                    //使用分页插件
+                    $(".pagination").jqPaginator({
+                        //总记录数
+                        totalCounts: pageBean.count,
+                        //每页大小
+                        pageSize:pageBean.size,
+                        //当前第几页
+                        currentPage: pageBean.current,
+                        //页码的点击事件, num页码, type操作的类型：init, change
+                        onPageChange: function (num, type) {
+                            if (type == "change") {
+                                changePage(cid, num, rname);  //调用自己查询分页数据
+                            }
+                        }
+                    });
+                }
+                else {
+                    //清空ul中所有元素
+                    $(".pagination").empty();
+                }
+            }
+        });
+    }
+</script>
+</html>

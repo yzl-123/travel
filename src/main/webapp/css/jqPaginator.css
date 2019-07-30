@@ -1,0 +1,37 @@
+ .pagination > li > a {
+    margin-right: 5px;
+    border-radius: 2px;
+    background: #fff;
+    color: #333;
+    border-color: #ccc;
+    padding: 6px 15px
+}
+
+ .pagination > li > a:hover,  .pagination > li > a:focus {
+    color: #fff;
+    background: #fb9400;
+    border-color: #fb9400
+}
+
+ .pagination > .active > a,  .pagination > .active > a:hover,  .pagination > .active > a:focus {
+    color: #fff;
+    background: #fb9400;
+    border-color: #fb9400
+}
+
+ .pagination .arrow2 {
+    margin: 3px 8px 5px 0
+}
+
+ .pagination a:hover .arrow2 {
+    border-right-color: #fff
+}
+
+ .pagination .arrow3 {
+    margin: 3px 0 5px 8px
+}
+
+ .pagination a:hover .arrow3 {
+    border-left-color: #fff
+}
+

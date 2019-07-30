@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>收藏排行榜</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/jqPaginator.css">
+
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" type="text/css" href="css/ranking-list.css">
+
+    <script src="js/jquery-3.3.1.js"></script>
+    <script src="js/jqPaginator.js"></script>
+</head>
+<body>
+<!--引入头部-->
+<div id="header"></div>
+<div class="contant">
+    <div class="shaixuan">
+        <span>线路名称</span>
+        <input type="text" id="rname">
+        <span>金额</span>
+        <input type="text" id="startPrice">~<input type="text" id="endPrice">
+        <button id="btnConditionSearch">搜索</button>
+    </div>
+    <div class="list clearfix">
+        <ul id="rankPage">
+
+        </ul>
+    </div>
+    <div class="pageNum">
+        <span id="info"></span><br/>
+        <ul class="pagination">
+        </ul>
+    </div>
+</div>
+
+<!--导入底部-->
+<div id="footer"></div>
+<!--导入布局js，共享header和footer-->
+<script type="text/javascript" src="js/include.js"></script>
+<script type="text/javascript">
+    $(function () {
+        changePage(1,"","","");
+
+        //搜索按钮的点击事件
+        $("#btnConditionSearch").click(function () {
+            //得到三个值
+            var rname = $("#rname").val().trim();
+            var startPrice = $("#startPrice").val().trim();
+            var endPrice = $("#endPrice").val().trim();
+            changePage(1, rname, startPrice, endPrice);
+        });
+    });
+
+    //查询1页的数据
+    function changePage(current,rname,startPrice,endPrice) {
+        //访问服务器得到1页的数据，显示在#rankPage ul中
+        $.get({
+            url: "route",
+            data: {
+                action: "findRoutesFavoriteRank",
+                current: current,
+                rname: rname,
+                startPrice: startPrice,
+                endPrice: endPrice
+            },
+            success: function (pageBean) {  //得到返回的数据
+                var html = "";
+                var routes = pageBean.data;
+                for (var i = 0; i < routes.length; i++) {
+                    var route = routes[i];  //i从0-7
+                    //计算编号
+                    var num = (pageBean.current - 1) * pageBean.size + 1 + i;
+                    if (num == 1) {
+                        html += "<li><span class=\"num one\">1</span>";
+                    }
+                    else if (num == 2) {
+                        html += "<li><span class=\"num two\">2</span>";
+                    }
+                    else {
+                        html += "<li><span class=\"num\">" + num + "</span>"
+                    }
+                    //拼接后面的内容
+                    html += "<a href=\"route_detail.html?rid=" + route.rid + "\"><img src=\"" + route.rimage + "\" alt=\"\"></a>\n" +
+                        "<h4><a href=\"route_detail.html?rid=" + route.rid + "\">" + route.rname + "</a></h4>\n" +
+                        "<p>\n" +
+                        "<b class=\"price\">¥<span>" + route.price + "</span>起</b>\n" +
+                        "<span class=\"shouchang\">已收藏" + route.count + "次</span>\n" +
+                        "</p>\n" +
+                        "</li>";
+                    //放在#rankPage中
+                    $("#rankPage").html(html);
+
+                    $("#info").text("共" + pageBean.total + "页 共" + pageBean.count + "条记录");
+
+                    //使用分页插件
+                    $(".pagination").jqPaginator({
+                        totalCounts: pageBean.count,  //总记录数
+                        currentPage: pageBean.current,  //当前页
+                        pageSize: pageBean.size,  //每页大小
+                        onPageChange: function (num, type) {
+                            if (type == "change") {
+                                changePage(num, rname, startPrice, endPrice);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>
